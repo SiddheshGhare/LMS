@@ -1,15 +1,23 @@
 import React, { useState } from 'react'
 import { assets } from '../../assets/assets'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const SearchBar = ({data}) => {
+  
+  
+  
+  
+  
 
    const navigate=useNavigate()
    const [input,setInput]=useState(data?data:"")
     const onSearchhandler =(e)=>{
         e.preventDefault()
         navigate("/course-list/"+input)
+       
     }
+    
+    
   return (
     <div>
       <form onSubmit={onSearchhandler} className=' flex h-10 '>
