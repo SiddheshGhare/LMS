@@ -276,7 +276,7 @@ export const dummyCourses = [
         "courseRatings": [
             {
                 "userId": "user_2qjlgkAqIMpiR2flWIRzvWKtE0w",
-                "rating": 5,
+                "rating": 4,
                 "_id": "6773e37360cb0ab974342314"
             }
         ],
