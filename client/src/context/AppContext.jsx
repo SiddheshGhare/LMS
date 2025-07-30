@@ -2,12 +2,14 @@ import { createContext, useEffect, useState } from "react";
 import { dummyCourses } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 export const AppContext = createContext();
+import humanizeDuration from "humanize-duration";
 
 
 export const AppContextProvider = (props) => {
     const currency = import.meta.env.VITE_CURRENCY
     const [allCourses, setAllCourses] = useState([])
     const [isEducator,setIsEducator]=useState(true)
+    const [enrolledCourses ,setEnrolledCourses]=useState([])
 
     const navigate = useNavigate()
 
@@ -29,9 +31,7 @@ export const AppContextProvider = (props) => {
         return totalRating / course.courseRatings.length;
     }
 
-    useEffect(() => {
-        fetchAllCourses()
-    }, [])
+    
 
     //function to calculate course chapter time
     const calculateChapterTime=(chapter)=>{
@@ -47,19 +47,33 @@ export const AppContextProvider = (props) => {
             return humanizeDuration(time*60*1000,{units:["h","m"]})
         } 
         //function to calculate no of lectures in course 
-        const calculateNoOfLectures=()=>{
+        const calculateNoOfLectures=(course)=>{
             let totalLectures=0
             course.courseContent.forEach((chapter)=>{
                 if (Array.isArray(chapter.chapterContent)) {
                     totalLectures+=chapter.chapterContent.length
                 }
-                return totalLectures;
+                
+                
+                
             })
+            return totalLectures;
         }
+
+        // fetch userEnrolled Courses
+        const fetUserEnrolledCourses = async ()=>{
+            setEnrolledCourses(dummyCourses)
+        }
+        useEffect(() => {
+        fetchAllCourses()
+        fetUserEnrolledCourses()
+    }, [])
 
     const value = {
         currency, allCourses, navigate,calculateRating
-        ,isEducator,setIsEducator
+        ,isEducator,setIsEducator,calculateNoOfLectures
+        ,calculateCourseDuration,calculateChapterTime,
+        enrolledCourses,fetUserEnrolledCourses
     }
 
     return (
