@@ -1,10 +1,12 @@
 import React, { useContext, useState } from 'react'
 import { AppContext } from '../../context/AppContext'
-import { useSearchParams } from 'react-router-dom'
+import {Line} from "rc-progress"
+import Footer from '../../components/student/Footer'
+
 
 const MyEnrollments = () => {
 
-  const {enrolledCourses,calculateCourseDuration} =useContext(AppContext)
+  const {enrolledCourses,calculateCourseDuration,navigate} =useContext(AppContext)
   const [progressArray, setProgressArray]=useState([
     {lectureCompleted:2,totalLectures:4},
     {lectureCompleted:3,totalLectures:6},
@@ -40,6 +42,7 @@ const MyEnrollments = () => {
                 <img src={course.courseThumbnail} alt="" className='w-14 sm:w-24 md:w-28' />
                 <div className=' flex-1 '>
                   <p className='mb-1 max-sm:text-sm '>{course.courseTitle}</p>
+                  <Line strokeWidth={2} percent={progressArray[i]? (progressArray[i].lectureCompleted*100)/ progressArray[i].totalLectures :0} className='bg-gray-300 rounded-full'/>
                 </div>
               </td>
               <td className=' px-4 py-3 max-sm:hidden'>
@@ -51,7 +54,7 @@ const MyEnrollments = () => {
                } <span>lectures</span>
               </td> 
               <td className=' px-4 py-3 max-sm:text-right'>
-                <button className='px-3 sm:px-5 py-1.5 sm:py-2 bg-blue-600 max-sm:text-xs text-white'>
+                <button onClick={()=>navigate('/player/' + course._id)} className='px-3 sm:px-5 py-1.5 sm:py-2 bg-blue-600 max-sm:text-xs text-white'>
                  
                  {
                   progressArray[i] && progressArray[i].lectureCompleted / progressArray[i].totalLectures === 1 ?"completed":"ongoing"
@@ -62,6 +65,7 @@ const MyEnrollments = () => {
         </tbody>
       </table>
     </div>
+    <Footer/>
     </>
   )
 }
