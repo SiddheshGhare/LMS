@@ -11,9 +11,9 @@ const Navbar = () => {
       <img src={assets.logo} alt="logo" />
       </Link>
       <div className='flex items-center text-gray-500 relative gap-5'>
-        <p>Hi!{user? user.fullName:Developers}</p>
+        <p>Hi!{user? user.fullName:'Developers'}</p>
         {
-          user? <UserButton/>:<img src={assets.profile_img}/>
+          user? <UserButton/>:<img className='w-8 h-8' src={assets.profile_img}/>
         }
       </div>
     </div>
