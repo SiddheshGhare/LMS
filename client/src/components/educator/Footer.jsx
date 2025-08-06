@@ -4,6 +4,7 @@ import { assets } from '../../assets/assets'
 function Footer() {
   return (
     <footer className='flex md:flex-row flex-col-reverse items-center justify-between w-full px-8 border-t py-4'>
+      
       {/* Left Section (Logo + Divider + Copyright) */}
       <div className='flex items-center gap-4'>
         {/* Logo */}
@@ -24,6 +25,7 @@ function Footer() {
         <a href="#"><img src={assets.instagram_icon} alt="Instagram" /></a>
         <a href="#"><img src={assets.twitter_icon} alt="Twitter" /></a>
       </div>
+
     </footer>
   )
 }
