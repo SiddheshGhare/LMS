@@ -24,18 +24,78 @@ const AddCourse = () => {
   })
 
   const handleChapter =(action,chapterId)=>{
-    
+    if (action === 'add') {
+      const title = prompt('emter chapter name :')
+      if(title){
+      const newChapter ={
+        chapterId:uniqid(),
+        chapterTitle:title,
+        chapterContent:[],
+        collapsed:false,
+        chapterOrder:chapters.length > 0 ? chapters.slice(-1)[0].chapterOrder + 1 : 1
 
+      }
+      setChapters([...chapters,newChapter])
+    }
+    }else if (action ==='remove') {
+      setChapters(chapters.filter((chapter)=>chapter.chapterId !== chapterId))
+    }else if (action==='toggle') {
+      setChapters(chapters.map((chapter)=> chapter.chapterId=== chapterId ? {...chapter,collapsed:!chapter.collapsed}:chapter))
+    }
+
+
+  }
+
+  const handleLecture =(action , chapterId,lectureIndex)=>{
+    if (action == "add") {
+      setCurrentChapterId(chapterId)
+      setPopUp(true)
+    }else if (action === "remove") {
+      setChapters(
+        chapters.map((chapter)=>{
+            if (chapter.chapterId === chapterId) {
+              chapter.chapterContent.splice(lectureIndex,1)
+            }
+            return chapter;
+        })
+      )
+    }
+  }
+
+  const addLecture =()=>{
+    setChapters(
+      chapters.map((chapter)=>{
+        if (chapter.chapterId === currentChapterId) {
+          const newLecture={
+            ...lectureDetails,
+            lectureOrder:chapter.chapterContent.length > 0 ? chapter.chapterContent.slice(-1)[0].lectureOrder+1 : 1
+          }
+          chapter.chapterContent.push(newLecture)
+        }
+        return chapter
+
+      })
+      );
+      setPopUp(false)
+      setLecturedetails({
+        lectureTitle:"",
+        lectureDuration:"",
+        lectureUrl:"",
+        isPreviewFree:false,
+      })
+  }
+  const handleSubmit=(e)=>{
+    e.preventDefault();
   }
 
   useEffect(()=>{
     if (!quillRef.current && editorRef.current) {
       quillRef.current = new Quill(editorRef.current,{theme:"snow",})
     }
-  },[])
+  },[chapters])
   return (
     <div className='h-screen overflow-scroll flex flex-col items-start justify-between md:p-8 md:pb-0 p-4 pt-8 pb-0'>
-      <form  className='flex  flex-col gap-4 max-w-md w-full text-gray-500 '>
+      <form onSubmit={handleSubmit}  className='flex  flex-col gap-4 max-w-md w-full text-gray-500 '>
         <div>
           <p>Course Title</p>
           <input
@@ -98,46 +158,46 @@ const AddCourse = () => {
 
         {/* Adding Chapters and lectures */}
         <div>
-          {
-            chapters.map((chapter,chapterIndex)=>{
+          {chapters &&
+            chapters.map((chapter,chapterIndex)=>(
               <div key={chapterIndex} className='bg-white border  rounded-lg mb-4'>
                 <div className='flex justify-between items-center p-4 border-b'>
                   <div className='flex items-center'>
-                    <img src={assets.down_arrow_icon} width={14} alt="" className={`mr-2 cursor-pointer transition-all ${chapter.collapsed && "-rotate-90"}`} />
-                    <span className='font-semibold'>{chapterIndex+1}{chapter.chapterTitle}</span>
+                    <img onClick={()=>handleChapter("toggle",chapter.chapterId)} src={assets.down_arrow_icon} width={14} alt="" className={`mr-2 cursor-pointer transition-all ${chapter.collapsed && "-rotate-90"}`} />
+                    <span className='font-semibold'>{chapterIndex+1} {" "} {chapter.chapterTitle}</span>
 
                   </div>
                   <span className='text-gray-500'>{chapter.chapterContent.length} lectures</span>
-                  <img src={assets.cross_icon} alt="" className='cursor-pointer' />
+                  <img onClick={()=>handleChapter("remove",chapter.chapterId)} src={assets.cross_icon} alt="" className='cursor-pointer' />
                 </div>
                   {
                     !chapter.collapsed && (
                       <div className="p-4">
                         {
-                          chapter.chapterContent.map((lecture,lectureIndex)=>{
+                          chapter.chapterContent.map((lecture,lectureIndex)=>(
                             <div key={lectureIndex} className=' flex justify-between items-center mb-2'>
                               <span>{lectureIndex +1}{lecture.lectureTitle}-{lecture.lectureDuration}mins - <a href={lecture.lectureUrl } target='_blank' className=' text-blue-500'>Link</a> - {lecture.isPreviewFree?
                                "Free Preview " :'paid'}</span>
-                               <img src={assets.cross_icon} alt="" className='cursor-pointer' />
+                               <img onClick={()=>handleLecture('remove',chapter.chapterId,lectureIndex)} src={assets.cross_icon} alt="" className='cursor-pointer' />
                             </div>
-                          })
+                          ))
                         }
 
-                        <div className='inline-flex bg-gray-100 p-2 rounded cursor-pointer mt-2'>Add Lecture</div>
+                        <div onClick={()=>handleLecture("add",chapter.chapterId)} className='inline-flex bg-gray-100 p-2 rounded cursor-pointer mt-2'>Add Lecture</div>
 
                       </div>
                     )
                   }
               </div>
 
-            })
+            ))
           }
           <div className='flex justify-center items-center bg-blue-100 p-2 rounded-lg cursor-pointer' onClick={()=>handleChapter("add")}>
             Add  Chapter
           </div>
           {
             showPopUp && (
-              <div className='fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50'>
+              <div className='fixed inset-0 flex items-center justify-center bg-blue-800/50'>
                 <div className='bg-white text-gray-700 p-4 rounded relative w-full max-w-80'>
                 <h2 className='text-lg font-semibold mb-4'>Add Lectures</h2>
                 <div className='mb-2'>
@@ -166,15 +226,15 @@ const AddCourse = () => {
                   />
                 </div>
 
-                 <div className='mb-2'>
+                 <div className='mb-2 flex  gap-4 items-center'>
                   <p>Is preview Free</p>
                   <input type="checkbox" 
-                  className='mt-1 block w-full border rounded py-1 px-2 '
+                  className='mt-1   border rounded py-1 px-2 '
                   value={ lectureDetails.isPreviewFree}
                   onChange={(e)=>setLecturedetails({ ...lectureDetails,isPreviewFree:e.target.checked})}
                   />
                 </div>
-                <button type='button' className=' w-full bg-blue-400 text-white px-4 py-2 rounded '>Add</button>
+                <button onClick={addLecture} type='button' className=' w-full bg-blue-400 text-white px-4 py-2 rounded '>Add</button>
 
                 <img src={assets.cross_icon} className=' absolute top-4 right-4 w-4 cursor-pointer'
                  onClick={()=>setPopUp(false)} alt="" />
