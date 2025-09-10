@@ -6,11 +6,13 @@ import humanizeDuration from "humanize-duration";
 import {useAuth,useUser} from "@clerk/clerk-react"
 
 
+
 export const AppContextProvider = (props) => {
     const currency = import.meta.env.VITE_CURRENCY
     const [allCourses, setAllCourses] = useState([])
     const [isEducator,setIsEducator]=useState(true)
     const [enrolledCourses ,setEnrolledCourses]=useState([])
+    const [token ,setToken]=useState()
 
     const {getToken}= useAuth()
     const {user}=useUser()
@@ -73,15 +75,21 @@ export const AppContextProvider = (props) => {
         fetUserEnrolledCourses()
     }, [])
 
-    const logToken =async()=>{
-        console.log(await getToken())
-    }
+  
 
-    useEffect(()=>{
-        if (user) {
-            logToken()
-        }
-    },[user])
+    const logToken =async()=>{
+       
+      console.log("userId is :",user.id);
+      console.log("hii");
+      
+       
+    }
+  
+    useEffect(() => {
+    if (user) {
+    console.log("userId is:", user.id);
+     }
+     }, [user]);
 
     const value = {
         currency, allCourses, navigate,calculateRating

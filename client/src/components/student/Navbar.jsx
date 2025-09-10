@@ -25,17 +25,18 @@ const Navbar = () => {
             <div className='flex items-center gap-5'>
 
 
-              {user.isSignedIn &&
+              
                <>
                 <button className=' cursor-pointer' onClick={()=>navigate("/educator")}>{isEducator?"Educator Dahsboard":"Become Educator"}</button>
               |   <Link to="/my-enrollments">My Enrollments</Link>
               </>
-              }
+              
             </div>
 
+            <Link to='/signup'>signup</Link>
 
-           {user.isSignedIn ? <UserButton/>:
-            <button onClick={()=> openSignIn()} className='bg-blue-600 text-white px-5 py-2 rounded-full'>Create Account</button>}
+
+           
         </div>
 
 
