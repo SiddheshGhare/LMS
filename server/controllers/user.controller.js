@@ -100,11 +100,12 @@ const loginUser = asyncHandler(async (req, res) => {
     const loggedUser = await User.findById(user._id).select("-password -refreshToken")
 
 
-   const options = {
+   // In logoutUser controller, update the options to match login:
+const options = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production", // only secure in production
-  sameSite: "lax",
-};
+  secure: process.env.NODE_ENV === "production", // Match your login settings
+  sameSite: "lax", // Match your login settings
+}
 
 
     return res.status(200)
