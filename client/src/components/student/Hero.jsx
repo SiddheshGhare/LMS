@@ -5,35 +5,8 @@ import {useUser} from "@clerk/clerk-react"
 
 
 const Hero = () => {
- const { user, isLoaded, isSignedIn } = useUser();
+ 
 
-  if (isLoaded && isSignedIn) {
-    console.log("userId is:", user.id);
-  }
-
-
-
-  
-  const handleSubmit = async () => {
-    try {
-      console.log("hii");
-      
-      const res = await fetch(`http://localhost:7000/add`,{
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(user), // 👈 send full Clerk user object
-    });
-
-      
-      const data = await res.json(); // parse JSON response
-
-      console.log("Response:", data);
-    } catch (err) {
-      console.error("Error fetching:", err);
-    }
-  };
 
 
 
@@ -44,7 +17,7 @@ const Hero = () => {
       <p className='md:block hidden text-gray-500 max-w-2xl mx-auto'>we bring together world class instructors ,interactive content and a supportive community to help  you achive your personal and professional goals</p>
 
       <p className='md:hidden  text-gray-500 max-w-sm mx-auto'>we bring together world class instructors ,interactive content and a supportive community to help  you achive your personal and professional goals</p>
-      <button onClick={()=> handleSubmit()}>send req</button>
+    
 
        {/* <button onClick={handleSubmit()}>send</button> */}
      

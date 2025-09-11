@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import React, { useContext, useState ,} from "react";
+import { UserContext } from "../../context/authContext";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  
+  const navigate = useNavigate()
+
+  const {loginuser ,error,loading}=useContext(UserContext)
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+ 
 
   // Handle input change
   const handleChange = (e) => {
@@ -16,38 +22,14 @@ const Login = () => {
   };
 
   // Handle form submit
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e)=>{
     e.preventDefault(); // prevent page reload
-    setError("");
-    setLoading(true);
+    loginuser(formData,e)
+    navigate("/")
 
-    try {
-      const res = await fetch("http://localhost:7000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
 
-      const data = await res.json();
-      setLoading(false);
-
-      if (!res.ok) {
-        setError(data.message || "Login failed. Try again.");
-        return;
-      }
-
-      console.log("Login successful:", data);
-      alert("Login successful!");
-      // You can store token in localStorage if backend returns one:
-      // localStorage.setItem("token", data.token);
-    } catch (err) {
-      console.error("Error:", err);
-      setError("Something went wrong. Please try again.");
-      setLoading(false);
-    }
-  };
+  }
+ 
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

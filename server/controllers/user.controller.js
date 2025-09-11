@@ -100,19 +100,21 @@ const loginUser = asyncHandler(async (req, res) => {
     const loggedUser = await User.findById(user._id).select("-password -refreshToken")
 
 
-    const options = {
-        httpOnly: true,
-        secure: true
-    }
+   const options = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production", // only secure in production
+  sameSite: "lax",
+};
+
 
     return res.status(200)
         .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        // .cookie("refreshToken", refreshToken, options)
         .json(
             new ApiResponse(
                 200,
                 {
-                    user: loggedUser, accessToken, refreshToken
+                    user: loggedUser, accessToken
                 },
                 "user logged in successfully"
             )
@@ -124,4 +126,35 @@ const loginUser = asyncHandler(async (req, res) => {
 
 })
 
-export {registerUser,loginUser}
+
+const logoutUser = asyncHandler(async (req, res) => {
+
+   const logoutUser= await User.findByIdAndUpdate(req.user._id,
+        {
+            $set: {
+                refreshToken: undefined
+            },
+        },
+        {
+            new: true//to get new updated model
+        })
+        console.log(logoutUser);
+        
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+    return res.status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(
+            new ApiResponse(200, {}, "logged out successfully")
+        )
+
+
+
+})
+
+
+export {registerUser,loginUser,logoutUser}

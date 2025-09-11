@@ -4,9 +4,10 @@ import "dotenv/config"
 import connectDb from "./configs/mongodb.js"
 import { clerkWebhooks } from "./controllers/webHooks.js"
 
-import { requireAuth ,getAuth } from "@clerk/express"
 import connectToCloudinary from "./configs/cloudinary.config.js"
 //import { ClerkExpressWithAuth } from '@clerk/express';
+
+import cookieParser from "cookie-parser";
 
 
 
@@ -19,7 +20,15 @@ await connectDb();
 connectToCloudinary();
 
 
-app.use(cors())
+
+
+
+app.use(cors({
+  origin: "http://localhost:5173", // your frontend URL
+  credentials: true, // 👈 allow cookies to be sent
+}));
+
+app.use(cookieParser());
 app.use(express.json())
 
 

@@ -45,16 +45,21 @@ const Signup = () => {
       });
 
       const data = await res.json();
-      console.log("Signup response:", data);
+  console.log("Signup response:", data);
 
-      if (!res.ok)  setError(data.message || "Signup failed");
+  if (!res.ok) {
+    // This will hit for 409, 400, etc.
+    throw new Error(data.message || "Signup failed");
+  }
 
-      alert("Signup successful!");
-      setFormData({ fullname: "", email: "", password: "" }); // reset form
-      navigate('/login')
-    } catch (err) {
-      setError(err.message);
-    } finally {
+  alert("Signup successful!");
+  setFormData({ fullname: "", email: "", password: "" });
+  navigate('/login');
+
+} catch (err) {
+  console.error("Signup error:", err);
+  setError(err.message); // <-- Show "username or email already exists"
+}  finally {
       setLoading(false);
     }
   };
