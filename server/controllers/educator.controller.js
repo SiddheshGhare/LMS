@@ -56,10 +56,12 @@ const educatorDashboardData = asyncHandler(async(req,res)=>{
 
   const educator =req.user._id
 
-  const courses = await Course.find({educator});
+  const courses = await Course.find({ educator:new mongoose.Types.ObjectId(educator)});
   if (!courses) {
     throw new ApiError(500,"Courses not found")
   }
+  console.log(courses);
+  
   const totalCourses=courses.length
 
   const courseIds=courses.map((course)=>course._id)
@@ -133,7 +135,7 @@ const enrolledStudentsData = await Course.aggregate([
   }
 ]);
 
-console.log("Result:", enrolledStudentsData);
+
 
 if (!enrolledStudentsData) {
   throw new ApiError(501,"problem in aggregation")
