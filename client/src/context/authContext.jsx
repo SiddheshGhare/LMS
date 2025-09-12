@@ -1,12 +1,16 @@
 import { createContext, useState } from "react";
-
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast"; // Import toast
 
 export const UserContext = createContext();
 
 export const UserContextProvider = ({ children }) => {
+  // Fix: Add parentheses to actually call the hook
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [user, setUser] = useState({})
+  const [isEducator, setIsEducator] = useState(false);
+  const [user, setUser] = useState(null);
 
   const loginuser = async (formData) => {
     setError("");
@@ -27,61 +31,96 @@ export const UserContextProvider = ({ children }) => {
 
       if (!res.ok) {
         setError(data.message || "Login failed. Try again.");
+        // Show error toast
+        toast.error(data.message || "Login failed. Try again.");
         return;
       }
-      const { accessToken, refreshToken, user } = data.data;
+      
+      const { user } = data.data;
+      
+      if (user.role === "educator") {
+        setIsEducator(true);
+      }
 
-      console.log("Login successful:", user);
-      alert("Login successful!");
-      setUser(user)
-
+      // Replace alert with toast
+      toast.success("Login successful!");
+      setUser(user);
+      
     } catch (err) {
       console.error("Error:", err);
       setError("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
       setLoading(false);
     }
   };
 
   const logout = async () => {
-
     try {
       const res = await fetch("http://localhost:7000/api/user/logout", {
-        method: "POST", // or GET (depending on your backend route)
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: "include", // VERY IMPORTANT: allows cookies to be sent/cleared
+        credentials: "include",
       });
 
       const data = await res.json();
 
       if (!res.ok) {
         console.error("Logout failed:", data.message);
+        toast.error("Logout failed");
         return;
       }
 
       console.log("Logout successful:", data.message);
-
-      // Clear tokens from localStorage (if you stored them manually)
-      // localStorage.removeItem("accessToken");
-      // localStorage.removeItem("refreshToken");
-
-      // Optionally redirect user to login page
-      // window.location.href = "/login";
-      setUser(null)
+      toast.success("Logged out successfully!");
+      
+      // Reset all user-related state
+      setUser(null);
+      setIsEducator(false);
+      navigate("/");
+      
     } catch (err) {
       console.error("Error logging out:", err);
+      toast.error("Error logging out");
     }
+  };
 
+  const updateRole = async () => {
+    try {
+      const roleUpdated = await fetch("http://localhost:7000/api/user/update-role", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
 
-  }
+      const data = await roleUpdated.json();
+
+      if (roleUpdated.ok) {
+        setIsEducator(true);
+        toast.success("Role updated to educator!");
+        // Optionally update the user object with new role
+        setUser(prev => prev ? { ...prev, role: "educator" } : null);
+      } else {
+        toast.error(data.message || "Failed to update role");
+      }
+    } catch (err) {
+      console.error("Error updating role:", err);
+      toast.error("Error updating role");
+    }
+  };
 
   const value = {
     loginuser,
     error,
     loading,
     user,
+    isAuthenticated: !!user,
+    isEducator,
     logout,
+    updateRole,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

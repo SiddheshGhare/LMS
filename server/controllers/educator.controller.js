@@ -1,27 +1,10 @@
 import { clerkClient } from "@clerk/express"
 import Course from "../models/course.model.js";
 import { v2 as cloudinary } from "cloudinary"
+import { ApiError } from "../utils/ApiError.js";
 
 
 
-export const updateRoleToEducator = async (req, res) => {
-  try {
-    const { userId } = req.auth()
-    console.log(req.auth());
-
-
-
-    await clerkClient.users.updateUser(userId, {
-      publicMetadata: {
-        role: "educator",
-      },
-    });
-    res.json({ success: true, message: "you can publish a course now" })
-  } catch (error) {
-    res.json({ success: false, message: "update role error:" + error.message })
-  }
-
-}
 
 
 // Add Course Api

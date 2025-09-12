@@ -4,34 +4,39 @@ import bcrypt from "bcrypt"
 
 const userSchema = new Schema(
     {
-        password:{
-            type:String,
-             required:true
+        password: {
+            type: String,
+            required: true
         },
-        fullname:{
-            type:String,
-            required:true
+        fullname: {
+            type: String,
+            required: true
         },
-        email:{
-            type:String,
-            required:true
+        email: {
+            type: String,
+            required: true
         },
-        imageUrl:{
-            type:String,
+        role: {
+            type: String,
+            enum: ["educator", "student"],  // Clean array with no extra spaces
+            default: "student"
+        },
+        imageUrl: {
+            type: String,
             // required:true
         },
-         refreshToken: {
-        type: String
-    },
-        enrolledCourses:[
+        refreshToken: {
+            type: String
+        },
+        enrolledCourses: [
             {
-                type:mongoose.Schema.Types.ObjectId,
-                ref:"course"
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "course"
             }
         ],
 
 
-},{timestamps:true})
+    }, { timestamps: true })
 
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();

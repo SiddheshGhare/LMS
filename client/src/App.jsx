@@ -16,6 +16,7 @@ import Navbar from './components/student/Navbar'
 import "quill/dist/quill.snow.css";
 import Signup from './components/student/signup'
 import Login from './components/student/login'
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const isEducatorRoute = useMatch("/educator/*")
@@ -45,6 +46,17 @@ function App() {
 
 
       </Routes>
+
+       <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+        }}
+      />
      </div>
     </>
   )

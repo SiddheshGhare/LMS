@@ -104,7 +104,7 @@ const loginUser = asyncHandler(async (req, res) => {
 const options = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production", // Match your login settings
-  sameSite: "lax", // Match your login settings
+  sameSite: "lax", 
 }
 
 
@@ -130,16 +130,16 @@ const options = {
 
 const logoutUser = asyncHandler(async (req, res) => {
 
-   const logoutUser= await User.findByIdAndUpdate(req.user._id,
+    await User.findByIdAndUpdate(req.user._id,
         {
             $set: {
-                refreshToken: undefined
+                refreshToken: null
             },
         },
         {
             new: true//to get new updated model
         })
-        console.log(logoutUser);
+       
         
 
     const options = {
@@ -157,5 +157,42 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 })
 
+ const updateRoleToEducator = async (req, res) => {
+  try {
+    const {_id}=req.user
 
-export {registerUser,loginUser,logoutUser}
+    if (!_id) {
+      throw new ApiError(500,"unAuthorised request userId not Found")
+    }
+
+    const user = await User.findByIdAndUpdate(_id,
+         {
+            $set: {
+                role: "educator"
+            },
+        },
+        {
+            new: true//to get new updated model
+        })
+
+        if (!user) {
+            throw new ApiError(500,"unable to update role")
+        }
+
+        return res.status(200)
+                  .ApiResponse(
+                    200,
+                    {user},
+                    "role updated successfully"
+                  )
+    
+
+  } catch (error) {
+    res.json({ success: false, message: "update role error:" + error.message })
+  }
+
+}
+
+
+
+export {registerUser,loginUser,logoutUser ,updateRoleToEducator}
