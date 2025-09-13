@@ -164,7 +164,105 @@ if (!enrolledStudentsData) {
 }
 )
 
-export {getAllCourses,addCourse,educatorDashboardData}
+// Get enrolled students data with purchase data using aggregation
+ const getEnrolledStudentsData = async (req, res) => {
+  try {
+    const educator = req.user._id;
+    const enrolledStudentsData = await Course.aggregate([
+     
+      {
+        $match: {
+          educator: new mongoose.Types.ObjectId(educator)
+        }
+      },
+      
+      {
+        $lookup: {
+          from: 'purchases', // Collection name (usually pluralized)
+          localField: '_id',  // Course _id
+          foreignField: 'courseId', // Purchase courseId
+          as: 'purchases',
+          pipeline: [
+            {
+              $match: {
+                status: 'completed' // Only completed purchases
+              }
+            }
+          ]
+        }
+      },
+      // Unwind purchases to get individual purchase documents
+      {
+        $unwind: '$purchases'
+      },
+      // Lookup user information from the purchase userId
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'purchases.userId',
+          foreignField: '_id',
+          as: 'studentInfo',
+          pipeline: [
+            {
+              $project: {
+                fullname: 1,
+                email: 1,
+                imageUrl: 1
+              }
+            }
+          ]
+        }
+      },
+      // Unwind student info
+      {
+        $unwind: '$studentInfo'
+      },
+      // Project the final structure
+      {
+        $project: {
+          courseId: '$_id',
+          courseTitle: 1,
+          courseDescription: 1,
+          courseThumbnail: 1,
+          coursePrice: 1,
+          purchase: {
+            _id: '$purchases._id',
+            amount: '$purchases.amount',
+            status: '$purchases.status',
+            createdAt: '$purchases.createdAt',
+            updatedAt: '$purchases.updatedAt'
+          },
+          student: {
+            _id: '$studentInfo._id',
+            fullname: '$studentInfo.fullname',
+            email: '$studentInfo.email',
+            imageUrl: '$studentInfo.imageUrl'
+          }
+        }
+      },
+      // Sort by purchase date (newest first)
+      {
+        $sort: {
+          'purchase.createdAt': -1
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: enrolledStudentsData
+    });
+
+  } catch (error) {
+    console.error('Error fetching enrolled students:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch enrolled students data'
+    });
+  }
+};
+
+export {getAllCourses,addCourse,educatorDashboardData,getEnrolledStudentsData}
 
 
 
