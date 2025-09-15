@@ -34,10 +34,12 @@ app.use(express.json())
 
 import educatorRouter from "./routes/educator.routes.js"
 import userRouter from "./routes/user.routes.js"
+import courseRouter from "./routes/course.routes.js"
 
 app.post("/clerk",clerkWebhooks)
 app.use('/api/educator',educatorRouter)
 app.use("/api/user",userRouter)
+app.use("/api/course",courseRouter)
 
 const PORT= process.env.PORT || 7000
 app.listen(PORT,()=>{
