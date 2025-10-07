@@ -1,8 +1,12 @@
+import mongoose from "mongoose";
 import {User} from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken"
+import { Purchase } from "../models/Purchase.model.js";
+import Stripe from "stripe"
+import Course from "../models/course.model.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -193,6 +197,113 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 }
 
+const getUserData = async (req,res)=>{
+    const userId = req.user._id
+    const user = await User.findById(userId)
+
+    if (!user) {
+        throw  new ApiError(500,"user not found")
+    }
+
+    return res.status(200).json(new ApiResponse(200,user,"user fetched successfully"))
+}
+
+const userEnrolledCourses = async (req,res)=>{
+    const userId = req.user._id
+    const userData = await User.aggregate([
+        {
+            $match:{
+            enrolledCourses:new mongoose.Types.ObjectId(userId)
+        }
+    },
+    {
+        $lookup:{
+            from:"Courses",
+            localField:"enrolledCourses",
+            foreignField:"_id",
+            as:"userEnrolledCourses"
+        }
+    },
+    {
+        $unwind:"$userEnrolledCourses"
+    },
+    {
+        $project:{
+             courseId: '$_id',
+          courseTitle: 1,
+          courseDescription: 1,
+          courseThumbnail: 1,
+          coursePrice: 1,
+          courseContent:1
+        }
+    }
+    ])
+
+    if (!userData) {
+        throw  new ApiError(500,"user not found")
+    }
+
+    return res.status(200).json(new ApiResponse(200,userData,"user fetched successfully"))
+}
+
+const purchaseCourse = async (req,res)=>{
+
+    try {
+        const {courseId}=req.body
+        const Origin= req.headers.Origin || "http://localhost:5173/"
+        console.log(Origin);
+        
+        const userId = req.user._id
+    
+        const user = await User.findById(userId)
+        if (!user) {
+                throw new ApiError(500,"user not found")
+        }
+        const course = await Course.findById(courseId)
+         if (!course) {
+                throw new ApiError(500,"course not found")
+        }
+    
+        const purchaseData = {
+            courseId:course._id,
+            userId,
+            amount:(course.coursePrice - course.discount * course.coursePrice / 100).toFixed(2)
+        }
+        const newPurchase = await Purchase.create(purchaseData)
+    
+        const stripeInstance = new Stripe(process.env.STRIPE_SECRETE_KEY)
+        const currency = process.env.CURRENCY||'usd'
+    
+       const line_items = [{
+            price_data: {
+                currency,
+                product_data: {
+                    name: course.courseTitle,
+                },
+                unit_amount: Math.floor(parseFloat(newPurchase.amount) * 100),
+            },
+            quantity: 1  // MOVED: quantity should be here, outside price_data
+        }];
+    
+        const session = await stripeInstance.checkout.sessions.create({
+            success_url:`${Origin}/loading/my-enrollments`,
+            cancel_url:`${Origin}/`,
+            line_items:line_items,
+            mode:"payment",
+            metadata:{
+                purchaseId :newPurchase._id.toString()
+            }
+        })
+    
+        res.json({success:true,session_url:session.url})
+    
+    
+    } catch (error) {
+        res.json({success:false,message:error.message})
+    }
+}
 
 
-export {registerUser,loginUser,logoutUser ,updateRoleToEducator}
+
+
+export {registerUser,loginUser,logoutUser ,updateRoleToEducator,getUserData,userEnrolledCourses,purchaseCourse}

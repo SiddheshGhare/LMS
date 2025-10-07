@@ -1,6 +1,7 @@
 
-
+import {Purchase} from "../models/Purchase.model.js"
 import Course from "../models/course.model.js";
+import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
@@ -39,9 +40,9 @@ const getCourseById = async (req, res) => {
     }
 
     // Check if course is published (optional - remove if you want to show unpublished courses to certain users)
-    if (!course.isPublished) {
-        throw new ApiError(403, "Course is not available");
-    }
+    // if (!course.isPublished) {
+    //     throw new ApiError(403, "Course is not available");
+    // }
 
     return res.status(200).json(
         new ApiResponse(
@@ -51,5 +52,7 @@ const getCourseById = async (req, res) => {
         )
     );
 };
+
+
 
 export{getAllCourses,getCourseById}
