@@ -9,12 +9,6 @@ import connectToCloudinary from "./configs/cloudinary.config.js"
 
 import cookieParser from "cookie-parser";
 
-
-
-
-
-
-
 const app = express()
 await connectDb();
 connectToCloudinary();
@@ -41,6 +35,10 @@ app.use('/api/educator',educatorRouter)
 app.use("/api/user",userRouter)
 app.use("/api/course",courseRouter)
 app.post("/stripe",express.raw({type:"application/json"}),stripeWebhooks)
+
+app.get('/',(req,res)=>{
+  return res.json({message:"success"})
+})
 
 const PORT= process.env.PORT || 7000
 app.listen(PORT,()=>{
