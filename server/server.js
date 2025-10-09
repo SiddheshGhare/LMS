@@ -15,7 +15,7 @@ connectToCloudinary();
 
 
 
-
+app.post("/stripe",express.raw({type:"application/json"}),stripeWebhooks)
 
 app.use(cors({
   origin: "http://localhost:5173", // your frontend URL
@@ -34,7 +34,7 @@ app.post("/clerk",clerkWebhooks)
 app.use('/api/educator',educatorRouter)
 app.use("/api/user",userRouter)
 app.use("/api/course",courseRouter)
-app.post("/stripe",express.raw({type:"application/json"}),stripeWebhooks)
+
 
 app.get('/',(req,res)=>{
   return res.json({message:"success"})

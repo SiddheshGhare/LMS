@@ -29,30 +29,37 @@ export const UserContextProvider = ({ children }) => {
       const data = await res.json();
       setLoading(false);
 
-      if (!res.ok) {
-        setError(data.message || "Login failed. Try again.");
-        // Show error toast
-        toast.error(data.message || "Login failed. Try again.");
+      // Check if backend response indicates failure
+      if (!res.ok || data.success === false) {
+        const message = data.message || "Login failed. Please try again.";
+        setError(message);
+        toast.error(message);
         return;
       }
-      
-      const { user } = data.data;
-      
+
+      // Success: extract user safely
+      const user = data?.data?.user || data?.user;
+      if (!user) {
+        toast.error("User data missing in response.");
+        return;
+      }
+
+      // Update state based on user role
       if (user.role === "educator") {
         setIsEducator(true);
       }
 
-      // Replace alert with toast
-      toast.success("Login successful!");
       setUser(user);
-      
+      toast.success("Login successful!");
+      navigate("/dashboard"); // redirect if needed
+
     } catch (err) {
-      console.error("Error:", err);
-      setError("Something went wrong. Please try again.");
+      console.error("Error during login:", err);
       toast.error("Something went wrong. Please try again.");
       setLoading(false);
     }
   };
+
 
   const logout = async () => {
     try {
@@ -74,12 +81,12 @@ export const UserContextProvider = ({ children }) => {
 
       console.log("Logout successful:", data.message);
       toast.success("Logged out successfully!");
-      
+
       // Reset all user-related state
       setUser(null);
       setIsEducator(false);
       navigate("/");
-      
+
     } catch (err) {
       console.error("Error logging out:", err);
       toast.error("Error logging out");
